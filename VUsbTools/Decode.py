@@ -56,7 +56,7 @@ class DecoderFactory:
                 name = name[:-3]
                 __import__("%s.%s" % (parentModule.__name__, name))
 
-                print "Loaded decoder module %r" % name
+                print("Loaded decoder module %r" % name)
                 self.register(getattr(parentModule, name).detector)
 
     def getDecoder(self, context):
@@ -66,8 +66,8 @@ class DecoderFactory:
         for detector in self._detectors:
             decoder = detector(context)
             if decoder:
-                print "Installing decoder %s.%s" % (
-                    decoder.__module__, decoder.__class__.__name__)
+                print("Installing decoder %s.%s" % (
+                    decoder.__module__, decoder.__class__.__name__))
                 return decoder
 
         if not context.endpoint:
@@ -170,13 +170,13 @@ class Device:
             interfaces = self.configs[self.currentConfig][1]
         except KeyError:
             return
-        for (iface, alt), (descriptor, endpoints) in interfaces.iteritems():
+        for (iface, alt), (descriptor, endpoints) in interfaces.items():
             if self.altSettings.get(iface, 0) != alt:
                 continue
 
             # We found an active altsetting for this interface.
             # Activate all its endpoint decoders.
-            for address, (descriptor, decoder) in endpoints.iteritems():
+            for address, (descriptor, decoder) in endpoints.items():
                 if decoder and address not in self.endpointDecoders:
                     self.endpointDecoders[address] = decoder
 

@@ -8,8 +8,10 @@
 # License, please see the README.txt. All rights reserved.
 #
 
-from __future__ import division
-import threading, difflib, gtk, gobject
+
+import threading, difflib
+from gi.repository import Gtk as gtk
+from gi.repository import GObject as gobject
 from VUsbTools import Views, Types
 
 
@@ -47,7 +49,7 @@ class BackgroundDiff(threading.Thread):
             if self.matcher and self.matcher.matching_blocks:
                 blocks = self.matcher.matching_blocks
                 newCheckpoint = len(blocks)
-                for i in xrange(self.checkpoint, newCheckpoint):
+                for i in range(self.checkpoint, newCheckpoint):
                     self.callback(blocks[i])
                 self.checkpoint = newCheckpoint
 
@@ -229,11 +231,12 @@ class DiffWindow:
                                          self.diffCallback)
             self.bgDiff.start()
 
-    def diffCallback(self, (i, j, n)):
+    def diffCallback(self, xxx_todo_changeme):
         """This is called by BackgroundDiff when a new matching
            block is discovered. The block starts at [i] and [j]
            in our events/summaries lists, and extends for 'n' elements.
            """
+        (i, j, n) = xxx_todo_changeme
         self.diffStatus.match(i, j, n)
 
         if n < 1:
@@ -252,7 +255,7 @@ class DiffWindow:
                  self.events[otherView][otherOffset + n - 1])))
 
             # Correlate each transaction with its match
-            for index in xrange(n):
+            for index in range(n):
                 self.diffMatches[self.events[view][offset + index]] = (
                     otherView, self.events[otherView][otherOffset + index])
 

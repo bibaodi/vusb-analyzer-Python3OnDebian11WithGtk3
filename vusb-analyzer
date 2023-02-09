@@ -8,8 +8,11 @@
 #
 
 VERSION = "1.1"
-
-import sys, os, gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
+from gi.repository import Gdk
+import sys, os
 from VUsbTools import Views, Log, Diff, Decode
 
 def main(filename, tailMode=False):
@@ -23,7 +26,7 @@ def main(filename, tailMode=False):
                             ui.status.progressQueue, tailMode)
     Decode.attachView(ui)
 
-    gtk.gdk.threads_init()
+    Gdk.threads_init()
     follower.start()
     try:
         gtk.main()
@@ -36,7 +39,7 @@ def diffMain(files, tailMode=False):
     ui.window.set_title("%s - VUsb Analyzer" % " / ".join([
         os.path.basename(f) for f in files]))
 
-    gtk.gdk.threads_init()
+    Gdk.threads_init()
     followers = []
 
     for f, view in zip(files, ui.views):
@@ -54,7 +57,7 @@ def diffMain(files, tailMode=False):
             follower.stop()
 
 def usage():
-    print ("usage: %s [-t] <log> [<log>]\n"
+    print(("usage: %s [-t] <log> [<log>]\n"
            "\n"
            "PyGTK frontend for the virtual USB analyzer\n"
            "Micah Elizabeth Scott <micah@vmware.com>\n"
@@ -77,7 +80,7 @@ def usage():
            "\n"
            "Two log files can be specified, in order to invoke\n"
            "diff mode.\n"
-           % (sys.argv[0], VERSION))
+           % (sys.argv[0], VERSION)))
     sys.exit(1)
 
 if __name__ == "__main__":

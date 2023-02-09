@@ -10,15 +10,21 @@
 # License, please see the README.txt. All rights reserved.
 #
 
-from __future__ import division
-import Queue, gtk, gobject
+
+
+import queue
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
+from gi.repository import Gdk
+from gi.repository import GObject as gobject
 from VUsbTools import Types, Style
 
 try:
     import gnomecanvas
 except ImportError:
-    print "Warning: You don't have gnome-canvas (or its python bindings) installed."
-    print "         The happy timing diagram will be disabled."
+    print("Warning: You don't have gnome-canvas (or its python bindings) installed.")
+    print("         The happy timing diagram will be disabled.")
     gnomecanvas = None
 
 
@@ -126,7 +132,7 @@ class Ruler(CanvasOwner):
         for count, scale in self.divisions:
             h = self.tickScale[1] / scale
             w = self.tickScale[0] / scale
-            for i in xrange(0, count):
+            for i in range(0, count):
                 fraction = i / count
                 self.resizer.track(group.add(gnomecanvas.CanvasRect,
                                              y1 = 0, y2 = h,
@@ -138,7 +144,7 @@ class Ruler(CanvasOwner):
         """Extend the scale to hold at least 's' seconds"""
         newTimeExtent = int(s + 1 - 1e-10)
         if newTimeExtent > self.timeExtent:
-            for s in xrange(self.timeExtent , newTimeExtent):
+            for s in range(self.timeExtent , newTimeExtent):
                 self.drawSecond(s)
             self.timeExtent = newTimeExtent
             self.resize(newTimeExtent * self.scale, self.height)
@@ -440,7 +446,7 @@ class ScrollContainer(gtk.Table):
 
                 self.attach(scroll, i+1, i+2,
                             len(vAxes)+1, len(vAxes)+2,
-                            gtk.FILL | gtk.SHRINK, 0)
+                            gtk.AttachOptions.FILL | gtk.AttachOptions.SHRINK, 0)
             else:
                 self.hAdjust.append(None)
                 self.hScroll.append(None)
@@ -455,14 +461,14 @@ class ScrollContainer(gtk.Table):
                 self.vScroll.append(scroll)
 
                 self.attach(scroll, len(hAxes)+1, len(hAxes)+2,
-                            i+1, i+2, 0, gtk.FILL | gtk.SHRINK)
+                            i+1, i+2, 0, gtk.AttachOptions.FILL | gtk.AttachOptions.SHRINK)
             else:
                 self.vAdjust.append(None)
                 self.vScroll.append(None)
 
     def add(self, child, x=0, y=0,
-            xflags=gtk.FILL | gtk.EXPAND | gtk.SHRINK,
-            yflags=gtk.FILL | gtk.EXPAND | gtk.SHRINK):
+            xflags=gtk.AttachOptions.FILL | gtk.AttachOptions.EXPAND | gtk.AttachOptions.SHRINK,
+            yflags=gtk.AttachOptions.FILL | gtk.AttachOptions.EXPAND | gtk.AttachOptions.SHRINK):
         self.attach(child, x+1, x+2, y+1, y+2, xflags, yflags)
 
     def attachEvent(self, widget, axis=0, horizontal=False):
@@ -498,13 +504,13 @@ class Resizer:
     def track(self, widget, **kw):
         self.map[widget] = kw
         s = self.ruler.scale
-        for prop, (a, b) in kw.iteritems():
+        for prop, (a, b) in kw.items():
             widget.set_property(prop, a*s + b)
 
     def rescale(self):
         s = self.ruler.scale
-        for widget, kw in self.map.iteritems():
-            for prop, (a, b) in kw.iteritems():
+        for widget, kw in self.map.items():
+            for prop, (a, b) in kw.items():
                 widget.set_property(prop, a*s + b)
 
 
@@ -525,7 +531,7 @@ class TimingDiagramPipe:
         # We use this fact to pair up and down transactions- each endpoint
         # gets a queue of 'Down' transactions which we pair up when we get
         # the corresponding 'Up'.
-        self.transactionQueue = Queue.Queue()
+        self.transactionQueue = queue.Queue()
 
     def handleEvent(self, transaction):
         """Add a single transaction to this pipe. We queue up and
@@ -537,9 +543,9 @@ class TimingDiagramPipe:
         elif transaction.dir == 'Up':
             try:
                 self.addPair(self.transactionQueue.get(False), transaction)
-            except Queue.Empty:
-                print "*** Warning, found an 'Up' transaction with no matching 'Down'."
-                print "    This should only occur when reading partial logfiles."
+            except queue.Empty:
+                print("*** Warning, found an 'Up' transaction with no matching 'Down'.")
+                print("    This should only occur when reading partial logfiles.")
 
     def getDataTransaction(self, down, up):
         """The 'data transaction' is the one we expect to see a useful
@@ -862,7 +868,7 @@ class TransactionList(View):
         self.onSelectionChanged(self.selection)
 
         # Allow multiple select, and hook up a context menu
-        self.selection.set_mode(gtk.SELECTION_MULTIPLE)
+        self.selection.set_mode(gtk.SelectionMode.MULTIPLE)
         self.changed_id = self.selection.connect("changed",
                                                  self.onSelectionChanged)
         self.view.connect("button-press-event", self.onButtonPressed)
@@ -881,6 +887,8 @@ class TransactionList(View):
            """
         if not self.settingCursor:
             row = view.get_cursor()[0]
+            if row is None:
+                return
             i = self.model.get_iter(row)
             event = self.model.get(i, 9)[0]
             self.notifyHilightChanged(event)
@@ -992,7 +1000,7 @@ class TransactionList(View):
                          lambda event, dir=dir: event.dir == dir)
             item.show()
 
-        pipes = self.pipes.keys()
+        pipes = list(self.pipes.keys())
         pipes.sort()
         for dev, transfer, endpt in pipes:
             item = gtk.MenuItem("Dev %s, %s" % (dev, transfer))
@@ -1140,7 +1148,7 @@ class ScrolledTransactionList(TransactionList):
         view = TransactionList.createWidgets(self)
 
         root = gtk.ScrolledWindow()
-        root.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        root.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
         root.add(view)
 
         # Give ourselves focus by default- currently there's nothing else
@@ -1165,11 +1173,11 @@ class TransactionDetail(View):
         self.decodedDetail.set_selectable(True)
 
         scroll1 = gtk.ScrolledWindow()
-        scroll1.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll1.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
         scroll1.add_with_viewport(self.dataDetail)
 
         scroll2 = gtk.ScrolledWindow()
-        scroll2.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scroll2.set_policy(gtk.PolicyType.AUTOMATIC, gtk.PolicyType.AUTOMATIC)
         scroll2.add_with_viewport(self.decodedDetail)
 
         paned = gtk.HPaned()
@@ -1231,7 +1239,7 @@ class StatusMonitor:
     interval = 500
 
     def __init__(self):
-        self.progressQueue = Queue.Queue()
+        self.progressQueue = queue.Queue()
         self.sources = {}
         self.completionCallbacks = []
 
@@ -1239,17 +1247,17 @@ class StatusMonitor:
 
         self.progressbar = gtk.ProgressBar()
         self.progressContext = self.statusbar.get_context_id("Progress")
-        self.statusbar.pack_end(self.progressbar, False)
+        self.statusbar.pack_end(self.progressbar, False, False, 0)
 
         self.cursorLabel = gtk.Label()
         frame = gtk.Frame()
         frame.add(self.cursorLabel)
-        self.statusbar.pack_end(frame, False)
+        self.statusbar.pack_end(frame, False, False,  0)
 
         self.selectionLabel = gtk.Label()
         frame = gtk.Frame()
         frame.add(self.selectionLabel)
-        self.statusbar.pack_end(frame, False)
+        self.statusbar.pack_end(frame, False, False, 0)
 
         self.poll()
 
@@ -1261,7 +1269,7 @@ class StatusMonitor:
                     source, progress = self.progressQueue.get(False)
                     self.sources[source] = progress
                     needUpdate = True
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             if needUpdate:
                 self.update()
@@ -1270,8 +1278,8 @@ class StatusMonitor:
             gtk.main_quit()
 
     def update(self):
-        overall = sum(self.sources.itervalues()) / len(self.sources)
-        busySources = [source for source, progress in self.sources.iteritems()
+        overall = sum(self.sources.values()) / len(self.sources)
+        busySources = [source for source, progress in self.sources.items()
                        if progress < 1.0]
 
         self.statusbar.pop(self.progressContext)
@@ -1319,8 +1327,8 @@ class MainWindow(ViewContainer):
         paned.set_position(250)
 
         mainvbox = gtk.VBox(False)
-        mainvbox.pack_start(paned, True)
-        mainvbox.pack_start(self.status.statusbar, False)
+        mainvbox.pack_start(paned, True, True, 0)
+        mainvbox.pack_start(self.status.statusbar, False, False, 0)
 
         self.window = gtk.Window()
         self.window.set_default_size(1200, 900)

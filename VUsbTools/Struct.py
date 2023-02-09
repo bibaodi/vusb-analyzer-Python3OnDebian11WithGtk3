@@ -95,7 +95,7 @@ class UInt32Hex(UInt32):
 class Utf16String(Item):
     def decode(self, buffer):
         l = len(buffer) & ~1
-        self._value = unicode(buffer[:l], 'utf16')
+        self._value = str(buffer[:l], 'utf16')
         return buffer[l:]
 
     def __str__(self):

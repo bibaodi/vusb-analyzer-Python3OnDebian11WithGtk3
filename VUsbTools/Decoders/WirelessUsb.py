@@ -443,7 +443,7 @@ class UwbEventDescriptorGroup(Struct.Group):
                    "heartbeat":"HeartBeat" }
 
         if not buffer:
-            print 'WirelessUSB Radio Event: buffer is empty'
+            print('WirelessUSB Radio Event: buffer is empty')
             return
 
         # Common descriptor header
@@ -468,9 +468,9 @@ class UwbEventDescriptorGroup(Struct.Group):
         blen = len(buffer)
 
         if blen < dlen - hdr_sz:
-            print 'Buffer Dump (incorrect size for %s)' % self.ev_name
+            print('Buffer Dump (incorrect size for %s)' % self.ev_name)
             for i in range(blen):
-                print '0x%02x' % ord(buffer[i])
+                print('0x%02x' % ord(buffer[i]))
             raise ValueError( "expected packet length >= %d but have %d" %
                               (dlen-hdr_sz,len(buffer)) )
         if dlen == -1:
@@ -696,9 +696,9 @@ class HwaEventDecoder():
     def handleEvent(self,event):
         buffer = event.data
         if buffer:
-            print 'HwaEvent Dump:'
+            print('HwaEvent Dump:')
             for i in range(len(buffer)):
-                print '0x%02x' % ord(buffer[i])
+                print('0x%02x' % ord(buffer[i]))
 # TODO: finish this off
         z = 0 + 0
 
@@ -1039,28 +1039,28 @@ class WusbEventDecoder():
 class ControlDispatcher(Decode.ControlDecoder):
     def isUwbControlPacket(self,event):
         setup = Decode.SetupPacket(event)
-        if UwbControlDescriptorGroup.requests.keys().__contains__( (setup.bitmap,setup.request) ):
+        if list(UwbControlDescriptorGroup.requests.keys()).__contains__( (setup.bitmap,setup.request) ):
             return 1
         return 0
 
     def isHwaControlPacket(self,event):
         setup = Decode.SetupPacket(event)
-        if HwaControlDescriptorGroup.requests.keys().__contains__( (setup.bitmap,setup.request) ):
+        if list(HwaControlDescriptorGroup.requests.keys()).__contains__( (setup.bitmap,setup.request) ):
             return 1
         return 0
     def isDwaControlPacket(self,event):
         setup = Decode.SetupPacket(event)
-        if DwaControlDescriptorGroup.requests.keys().__contains__( (setup.bitmap,setup.request) ):
+        if list(DwaControlDescriptorGroup.requests.keys()).__contains__( (setup.bitmap,setup.request) ):
             return 1
         return 0
     def isWaControlPacket(self,event):
         setup = Decode.SetupPacket(event)
-        if WaControlDescriptorGroup.requests.keys().__contains__( (setup.bitmap,setup.request) ):
+        if list(WaControlDescriptorGroup.requests.keys()).__contains__( (setup.bitmap,setup.request) ):
             return 1
         return 0
     def isSecurityControlPacket(self,event):
         setup = Decode.SetupPacket(event)
-        if SecurityControlDescriptorGroup.requests.keys().__contains__( (setup.bitmap,setup.request) ):
+        if list(SecurityControlDescriptorGroup.requests.keys()).__contains__( (setup.bitmap,setup.request) ):
             return 1
         return 0
     def isWusbControlPacket(self,event):
@@ -1151,7 +1151,7 @@ def detector(context):
         )
         if (clazz,proto,subclazz) == (239,3,1):
 # TODO: finish this off
-            print 'CableBasedAssociation'
+            print('CableBasedAssociation')
 
     # We respond with event decoders for interrupt endpoints
     if ifc and ep:
@@ -1165,4 +1165,4 @@ def detector(context):
             return UwbEventDecoder()
         elif (clazz,subclazz,proto,attr) == (224,2,1,3):
 # TODO: finish this off
-            print 'HwaEventDecoder'
+            print('HwaEventDecoder')

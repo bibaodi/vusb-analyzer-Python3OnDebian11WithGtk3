@@ -1,0 +1,3 @@
+.venv-usbAnalyser
+*.bak
+__pycache__

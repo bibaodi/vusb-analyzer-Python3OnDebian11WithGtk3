@@ -1,6 +1,18 @@
 ------------------------
 the Virtual USB Analyzer
 ------------------------
+Version 2.0 support Python3 with gtk3 on debian11
+
+# run example
+```
+./vusb-analyzer ./testData/1u.mon 
+```
+should see the window.
+
+
+below is my basements.
+------------------------------------------
+
 Version 1.1
 
 This is a GUI tool for analyzing logs of traced USB

@@ -160,7 +160,7 @@ class USBMuxDecoder:
                 kvFull = []
                 kvAbbrev = []
 
-                for k, v in plistlib.readPlistFromString(packet).items():
+                for k, v in list(plistlib.readPlistFromString(packet).items()):
                     kvFull.append("  %s = %s" % (k, v))
 
                     if isinstance(v, plistlib.Data):
